@@ -14,13 +14,13 @@ enum Orientation {
 
 
 pub struct Point {
-    x: f32,
-    y: f32
+    pub x: f64,
+    pub y: f64
 }
 
 
 impl Point {
-    pub fn new(x: f32, y: f32) -> Point {
+    pub fn new(x: f64, y: f64) -> Point {
         return Point { x: x, y: y }
     }
 }
@@ -98,7 +98,7 @@ pub fn determine_intersection_exists(p1:& Point, q1: &Point, p2: &Point, q2: &Po
 }
 
 
-fn max(a: f32, b: f32) -> f32 {
+fn max(a: f64, b: f64) -> f64 {
     if a > b {
         return a;
     }
@@ -106,7 +106,7 @@ fn max(a: f32, b: f32) -> f32 {
 }
 
 
-fn min (a: f32, b: f32) -> f32 {
+fn min (a: f64, b: f64) -> f64 {
     if a < b {
         return a;
     }
