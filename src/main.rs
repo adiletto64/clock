@@ -7,16 +7,17 @@ mod intersection;
 
 const RADIUS: u32 = 20;
 const LENGTH: usize = (RADIUS * 2) as usize + 1;
-const SPEED: u64 = 1000;
+const SPEED: u64 = 10;
 
 // as char width is less than it's height we should compensate increasing width
 const SPREED: usize = 2;
 
 
-struct Clock {
-    seconds: u32,
-    minutes: u32,
-    hours: u32
+struct Arrow {
+    angle_per_second: f32,
+    thickness: f32,
+    angle: f32,
+    len: f32
 }
 
 
@@ -26,19 +27,34 @@ type Matrix<'a> = [[&'a str; LENGTH * SPREED]; LENGTH];
 fn main() {
 
     let mut matrix: Matrix = [[" "; LENGTH * SPREED]; LENGTH];
-    
 
-    let mut current_angle = 180.0;
-    write_circle(&mut matrix);
+    let mut seconds = Arrow {
+        angle_per_second: 6.0,
+        thickness: 0.5,
+        angle: 180.0,
+        len: RADIUS as f32,
+    };
 
-    print!("\x1B[2J\x1B[1;1H");
+    let mut minutes = Arrow {
+        angle_per_second: 1.0,
+        thickness: 1.0,
+        angle: 180.0,
+        len: RADIUS as f32 - 5.0
+    };
+
+    let mut hours = Arrow {
+        angle_per_second: 0.01666666666666666666666666666666666,
+        thickness: 1.5,
+        angle: 180.0,
+        len: RADIUS as f32 - 10.0,
+    };
 
     loop {
 
         let mut previus_cooridates: Vec<(usize, usize)> = Vec::new();
 
         write_circle(&mut matrix);
-        write_arrow(&mut matrix, current_angle, &mut previus_cooridates);
+        write_arrow(&mut matrix, vec![&seconds, &minutes, &hours], &mut previus_cooridates);
 
 
         for row in matrix {
@@ -54,10 +70,10 @@ fn main() {
         previus_cooridates.clear();
 
         thread::sleep(Duration::from_millis(SPEED));
-        current_angle -= 6.0;
 
-
-
+        seconds.angle -= seconds.angle_per_second;
+        minutes.angle -= minutes.angle_per_second;
+        hours.angle -= hours.angle_per_second;
 
         print!("\x1B[2J\x1B[1;1H");
 
@@ -94,60 +110,50 @@ fn write_circle(matrix: &mut Matrix) {
 }
 
 
-fn write_arrow(matrix: &mut Matrix, angle: f32, previous_coordinates: &mut Vec<(usize, usize)>) {
+fn write_arrow(matrix: &mut Matrix, arrows: Vec<&Arrow>, previous_coordinates: &mut Vec<(usize, usize)>) {
     let radius = RADIUS as i32;
 
-    let cosinus = (angle as f32).to_radians().cos();
-    let sinus = (angle as f32).to_radians().sin();
-
-    let x = sinus * radius as f32 * SPREED as f32;
-    let y = cosinus * radius as f32;
-
-    const THICKNESS: f32 = 1.5;
 
     for col in 0..LENGTH {
         for row in 0..LENGTH * SPREED as usize {
 
-            let pos_y = col as i32 - radius;
-            let pos_x = row as i32 - radius * SPREED as i32;
+          
 
-            let point = intersection::Point::new(pos_x as f32, pos_y as f32);
-            let point_xplus_yplus = intersection::Point::new(pos_x as f32 + THICKNESS, pos_y as f32 + THICKNESS);
+            for arrow in &arrows {
 
-            let point_xplus = intersection::Point::new(pos_x as f32 + THICKNESS, pos_y as f32);
-            let point_yplus = intersection::Point::new(pos_x as f32, pos_y as f32 + THICKNESS);
+                let pos_y = col as i32 - radius;
+                let pos_x = row as i32 - radius * SPREED as i32;
 
-            let start_point = intersection::Point::new(0.0, 0.0);
-            let end_point = intersection::Point::new(x, y);
+                let cosinus = (arrow.angle as f32).to_radians().cos();
+                let sinus = (arrow.angle as f32).to_radians().sin();            
+
+                let x = sinus * radius as f32 * SPREED as f32;
+                let y = cosinus * radius as f32;           
 
 
-            if intersection::determine_intersection_exists(&point, &point_xplus_yplus, &start_point,& end_point) ||
-               intersection::determine_intersection_exists(&point_xplus,& point_yplus,& start_point, &end_point)  {
-                matrix[col][row] = "*";
-                previous_coordinates.push((col, row));
+                let start_point = intersection::Point::new(0.0, 0.0);
+                let end_point = intersection::Point::new(x, y);  
+
+
+                let point = intersection::Point::new(pos_x as f32, pos_y as f32);
+                let point_xplus_yplus = intersection::Point::new(pos_x as f32 + arrow.thickness, pos_y as f32 + arrow.thickness);
+
+                let point_xplus = intersection::Point::new(pos_x as f32 + arrow.thickness, pos_y as f32);
+                let point_yplus = intersection::Point::new(pos_x as f32, pos_y as f32 + arrow.thickness);
+
+                if intersection::determine_intersection_exists(&point, &point_xplus_yplus, &start_point,& end_point) ||
+                intersection::determine_intersection_exists(&point_xplus,& point_yplus,& start_point, &end_point)  {
+
+                    let hypotenuse_len = ((pos_x * pos_x / 4.0 as i32 + pos_y * pos_y) as f32).sqrt();
+
+                    if hypotenuse_len < arrow.len {
+                        matrix[col][row] = "*";
+                        previous_coordinates.push((col, row));                            
+                    }                
+
+                }                
             }
-        }
-    }
 
-}
-
-
-fn clean_previus_arrow(matrix: &mut Matrix) {
-    let radius = RADIUS as i32;
-
-    for col in 0..LENGTH {
-        for row in 0..LENGTH * SPREED as usize {
-
-            let pos_y = col as i32 - radius;
-            let pos_x = row as i32 - radius * SPREED as i32;
-
-            let hypotenuse_len = (((pos_x / SPREED as i32).pow(2) + pos_y.pow(2)) as f32).sqrt();
-            
-            if hypotenuse_len + 1.0 < radius as f32 {
-                if matrix[col][row] == "*" {
-                    matrix[col][row] = " ";
-                }
-            } 
 
         }
     }
