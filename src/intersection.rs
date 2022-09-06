@@ -1,4 +1,3 @@
-use std::cmp;
 
 
 // use https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
@@ -15,13 +14,13 @@ enum Orientation {
 
 
 pub struct Point {
-    x: i32,
-    y: i32
+    x: f32,
+    y: f32
 }
 
 
 impl Point {
-    fn new(x: i32, y: i32) -> Point {
+    pub fn new(x: f32, y: f32) -> Point {
         return Point { x: x, y: y }
     }
 }
@@ -30,10 +29,10 @@ impl Point {
 fn get_orientation(p: &Point, q: &Point, r: &Point) -> Orientation {
     let val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
 
-    if val > 0 {
+    if val > 0.0 {
         return Orientation::CLOCKWISE;
     } 
-    else if val < 0 {
+    else if val < 0.0 {
         return Orientation::COUNTERCLOCKWISE;
     } else {
         return Orientation::COLLINEAR;
@@ -45,10 +44,10 @@ fn get_orientation(p: &Point, q: &Point, r: &Point) -> Orientation {
 /// point q lies on line segment 'pr' 
 fn on_segment(p: &Point, q: &Point, r: &Point) -> bool {
 
-    if  (q.x <= cmp::max(p.x, r.x)) && 
-        (q.x >= cmp::min(p.x, r.x)) && 
-        (q.y <= cmp::max(p.y, r.y)) && 
-        (q.y >= cmp::min(p.y, r.y)) 
+    if  (q.x <= max(p.x, r.x)) && 
+        (q.x >= min(p.x, r.x)) && 
+        (q.y <= max(p.y, r.y)) && 
+        (q.y >= min(p.y, r.y)) 
     {
         return true;
     }
@@ -60,7 +59,7 @@ fn on_segment(p: &Point, q: &Point, r: &Point) -> bool {
 
 /// function that returns true if 
 /// the line segment 'p1q1' and 'p2q2' intersect.
-fn determine_intersection_exists(p1: Point, q1: Point, p2: Point, q2: Point) -> bool {
+pub fn determine_intersection_exists(p1:& Point, q1: &Point, p2: &Point, q2: &Point) -> bool {
     let o1 = get_orientation(&p1,& q1, &p2);
     let o2 = get_orientation(&p1,& q1, &q2);
     let o3 = get_orientation(&p2,& q2, & p1);
@@ -99,26 +98,43 @@ fn determine_intersection_exists(p1: Point, q1: Point, p2: Point, q2: Point) -> 
 }
 
 
+fn max(a: f32, b: f32) -> f32 {
+    if a > b {
+        a;
+    }
+    b
+}
+
+
+fn min (a: f32, b: f32) -> f32 {
+    if a < b {
+        a;
+    }
+    b
+}
+
+
+
 mod tests {
     use super::*;
 
     #[test]
     fn test_intersection_return_true() {
         assert!(determine_intersection_exists(
-            Point::new(1, 0), 
-            Point::new(2, 2), 
-            Point::new(0, 3), 
-            Point::new(2, 1)
+            &Point::new(1.0, 0.0), 
+            &Point::new(2.0, 2.0), 
+            &Point::new(0.0, 3.0), 
+            &Point::new(2.0, 1.0)
         ))
     }
 
     #[test]
     fn test_intersection_return_false() {
         assert!(!determine_intersection_exists(
-            Point::new(1, 0), 
-            Point::new(2, 2), 
-            Point::new(-4, 3),
-            Point::new(-2, 1)
+            &Point::new(1.0, 0.0), 
+            &Point::new(2.0, 2.0), 
+            &Point::new(-4.0, 3.0),
+            &Point::new(-2.0, 1.0)
         ));
     }   
 
