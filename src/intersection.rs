@@ -1,4 +1,4 @@
-
+#![allow(dead_code, unused_imports)]
 
 // use https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 
@@ -100,7 +100,7 @@ pub fn determine_intersection_exists(p1:& Point, q1: &Point, p2: &Point, q2: &Po
 
 fn max(a: f32, b: f32) -> f32 {
     if a > b {
-        a;
+        return a;
     }
     b
 }
@@ -108,7 +108,7 @@ fn max(a: f32, b: f32) -> f32 {
 
 fn min (a: f32, b: f32) -> f32 {
     if a < b {
-        a;
+        return a;
     }
     b
 }
@@ -116,7 +116,8 @@ fn min (a: f32, b: f32) -> f32 {
 
 
 mod tests {
-    use super::*;
+    use super::determine_intersection_exists;
+    use super::Point;
 
     #[test]
     fn test_intersection_return_true() {

@@ -1,13 +1,14 @@
 #![allow(dead_code)]
 
 use std::{thread, time::Duration};
+use chrono::prelude::*;
 
 mod intersection;
 
 
 const RADIUS: u32 = 20;
 const LENGTH: usize = (RADIUS * 2) as usize + 1;
-const SPEED: u64 = 10;
+const SPEED: u64 = 1000;
 
 // as char width is less than it's height we should compensate increasing width
 const SPREED: usize = 2;
@@ -27,25 +28,26 @@ type Matrix<'a> = [[&'a str; LENGTH * SPREED]; LENGTH];
 fn main() {
 
     let mut matrix: Matrix = [[" "; LENGTH * SPREED]; LENGTH];
+    let dt = Utc::now();
 
     let mut seconds = Arrow {
         angle_per_second: 6.0,
         thickness: 0.5,
-        angle: 180.0,
+        angle:  dt.second() as f32 * 6.0 + 90.0,
         len: RADIUS as f32,
     };
 
     let mut minutes = Arrow {
-        angle_per_second: 1.0,
-        thickness: 1.0,
-        angle: 180.0,
+        angle_per_second: 0.1,
+        thickness: 0.5,
+        angle: dt.minute() as f32 * 6.0 + 90.0,
         len: RADIUS as f32 - 5.0
     };
 
     let mut hours = Arrow {
         angle_per_second: 0.01666666666666666666666666666666666,
-        thickness: 1.5,
-        angle: 180.0,
+        thickness: 0.5,
+        angle: dt.hour() as f32 * 30.0 + 90.0,
         len: RADIUS as f32 - 10.0,
     };
 
