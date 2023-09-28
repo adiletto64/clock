@@ -1,15 +1,16 @@
 #![allow(dead_code)]
 
-use std::{thread, time::Duration};
+use std::{thread, time::Duration, f32::consts::PI};
 use chrono::prelude::*;
+use std::process::Command;
 
 
 mod intersection;
 
 
-const RADIUS: u32 = 22;
+const RADIUS: u32 = 20;
 const LENGTH: usize = (RADIUS * 2) as usize + 1;
-const SPEED: u64 = 1000;
+const SPEED: u64 = 5;
 
 // as char width is less than it's height we should compensate increasing width
 const STRAIN: usize = 2;
@@ -33,7 +34,7 @@ fn main() {
 
     let mut seconds = Arrow {
         angle_per_second: 6.0,
-        thickness: 0.6,
+        thickness: 0.8,
         angle: dt.second() as f64 * 6.0,
         len: RADIUS as f64,
     };
@@ -60,12 +61,22 @@ fn main() {
         // printed cells for futhermore cleaning
         let mut previus_cooridates: Vec<(usize, usize)> = Vec::new();
 
+        change_arrow_thickness(&mut seconds); change_arrow_thickness(&mut minutes); change_arrow_thickness(&mut hours); 
+
        
         write_arrow(
             &mut matrix, 
             vec![&seconds, &minutes, &hours], 
             &mut previus_cooridates
         );
+
+        Command::new("cmd")
+            .arg("/C")
+            .arg("mode")
+            .arg("con:")
+            .arg("cols=100")
+            .arg("lines=40")
+            .output().unwrap();
 
         // print to consle
         for row in matrix {
@@ -254,4 +265,12 @@ fn clean_previous(matrix: &mut Matrix, previous_coordinates: &mut Vec<(usize, us
             }
         }
     }
+}
+
+fn change_arrow_thickness(arrow: &mut Arrow) {
+    arrow.thickness = cosinus_uplifting(arrow.angle, 0.4);
+}
+
+fn cosinus_uplifting(angle: f64, strength: f64) -> f64 {
+    return (2.0 * (PI / 90.0) as f64 * angle).cos() as f64 * strength + strength * 1.9;
 }

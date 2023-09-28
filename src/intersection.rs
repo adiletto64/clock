@@ -62,8 +62,8 @@ fn on_segment(p: &Point, q: &Point, r: &Point) -> bool {
 pub fn determine_intersection_exists(p1:& Point, q1: &Point, p2: &Point, q2: &Point) -> bool {
     let o1 = get_orientation(&p1,& q1, &p2);
     let o2 = get_orientation(&p1,& q1, &q2);
-    let o3 = get_orientation(&p2,& q2, & p1);
-    let o4 = get_orientation(&p2,&q2, & q1);
+    let o3 = get_orientation(&p2,& q2, &p1);
+    let o4 = get_orientation(&p2,&q2, &q1);
 
     // general case
     if o1 != o2 && o3 != o4 {
